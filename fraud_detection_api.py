@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import joblib
 import numpy as np
+import pandas as pd
 import os
 from typing import Dict, List
 import time
@@ -45,6 +46,7 @@ class ModelManager:
         self.models = {}
         self.scaler = None
         self.results = []
+        self.expected_features = None
         self.load_models()
     
     def load_models(self):
@@ -64,6 +66,13 @@ class ModelManager:
                 
                 if os.path.exists('models/scaler.pkl'):
                     self.scaler = joblib.load('models/scaler.pkl')
+                    # Get the actual feature names used during training
+                    if hasattr(self.scaler, 'feature_names_in_'):
+                        print(f"Scaler expects features: {self.scaler.feature_names_in_}")
+                        self.expected_features = self.scaler.feature_names_in_
+                    else:
+                        self.expected_features = None
+                        
                 if os.path.exists('models/results.pkl'):
                     self.results = joblib.load('models/results.pkl')
                 
@@ -75,55 +84,104 @@ class ModelManager:
         """Predict fraud probability"""
         start_time = time.time()
         
-        # Create feature vector
-        features = self._create_features(transaction)
-        
-        # Get best model
-        best_model = self._get_best_model()
-        
-        if best_model and self.scaler:
-            features_scaled = self.scaler.transform(features.reshape(1, -1))
-            fraud_prob = best_model.predict_proba(features_scaled)[0][1]
-            model_name = self._get_best_model_name()
-        else:
-            fraud_prob = self._rule_based_prediction(transaction)
-            model_name = "Rule-based"
-        
-        # Risk assessment
-        if fraud_prob > 0.7:
-            risk_level, recommendation = "HIGH", "BLOCK"
-        elif fraud_prob > 0.4:
-            risk_level, recommendation = "MEDIUM", "REVIEW"
-        else:
-            risk_level, recommendation = "LOW", "APPROVE"
-        
-        processing_time = (time.time() - start_time) * 1000
-        
-        return {
-            "fraud_probability": float(fraud_prob),
-            "risk_level": risk_level,
-            "recommendation": recommendation,
-            "processing_time_ms": round(processing_time, 2),
-            "model_used": model_name,
-            "risk_factors": self._get_risk_factors(transaction, fraud_prob)
-        }
+        try:
+            # Create feature vector
+            features = self._create_features(transaction)
+            print(f"Features shape: {features.shape}")  # Debug
+            
+            # Get best model
+            best_model = self._get_best_model()
+            print(f"Best model: {type(best_model)}")  # Debug
+            
+            if best_model and self.scaler:
+                try:
+                    if self.expected_features is not None:
+                        # Use the exact feature names from training
+                        print(f"Using trained feature names: {list(self.expected_features)}")
+                        
+                        # Create features based on what the scaler expects
+                        if len(self.expected_features) == 29:  # V1-V28 + Amount
+                            features_df = pd.DataFrame([features[:29]], columns=self.expected_features)
+                        elif len(self.expected_features) == 30:  # V1-V28 + Amount + Time
+                            features_df = pd.DataFrame([features], columns=self.expected_features)
+                        else:
+                            # Fallback: use numpy array (bypass feature name checking)
+                            features_scaled = self.scaler.transform(features[:len(self.expected_features)].reshape(1, -1))
+                            fraud_prob = best_model.predict_proba(features_scaled)[0][1]
+                            model_name = self._get_best_model_name()
+                    else:
+                        # Bypass feature name checking by using numpy array directly
+                        print("Using numpy array (no feature names)")
+                        features_scaled = self.scaler.transform(features.reshape(1, -1))
+                        fraud_prob = best_model.predict_proba(features_scaled)[0][1]
+                        model_name = self._get_best_model_name()
+                    
+                    # Only do DataFrame transform if we haven't already done numpy transform
+                    if 'fraud_prob' not in locals():
+                        features_scaled = self.scaler.transform(features_df)
+                        fraud_prob = best_model.predict_proba(features_scaled)[0][1]
+                        model_name = self._get_best_model_name()
+                        
+                except Exception as e:
+                    print(f"Model prediction failed: {e}, falling back to rule-based")
+                    fraud_prob = self._rule_based_prediction(transaction)
+                    model_name = "Rule-based (fallback)"
+            else:
+                print("Using rule-based prediction")  # Debug
+                fraud_prob = self._rule_based_prediction(transaction)
+                model_name = "Rule-based"
+            
+            # Risk assessment
+            if fraud_prob > 0.7:
+                risk_level, recommendation = "HIGH", "BLOCK"
+            elif fraud_prob > 0.4:
+                risk_level, recommendation = "MEDIUM", "REVIEW"
+            else:
+                risk_level, recommendation = "LOW", "APPROVE"
+            
+            processing_time = (time.time() - start_time) * 1000
+            
+            return {
+                "fraud_probability": float(fraud_prob),
+                "risk_level": risk_level,
+                "recommendation": recommendation,
+                "processing_time_ms": round(processing_time, 2),
+                "model_used": model_name,
+                "risk_factors": self._get_risk_factors(transaction, fraud_prob)
+            }
+            
+        except Exception as e:
+            print(f"Error in predict_fraud: {e}")
+            raise e
     
     def _create_features(self, transaction: TransactionRequest) -> np.ndarray:
-        """Create feature vector from transaction"""
-        np.random.seed(hash(str(transaction.dict())) % 2147483647)
-        features = np.random.randn(28) * 2
+        """Create feature vector matching training data format"""
+        # Your trained model expects: V1-V28, Amount, Time (30 features total)
         
-        # Adjust based on transaction characteristics
+        features = np.zeros(30)  # V1-V28, Amount, Time
+        
+        # Create V1-V28 features (PCA components)
+        np.random.seed(hash(str(transaction.model_dump())) % 2147483647)
+        for i in range(28):
+            features[i] = np.random.normal(0, 1)  # V1-V28
+        
+        # Adjust some features based on transaction characteristics
         if not transaction.card_present:
-            features[16] += 2.0
+            features[16] += 1.0  # V17 feature
         if transaction.hour < 6 or transaction.hour > 22:
-            features[9] += 1.5
+            features[9] += 0.5   # V10 feature
         if transaction.merchant in ["Unknown", "Crypto", "Foreign"]:
-            features[13] += 2.0
+            features[13] += 1.0  # V14 feature
         if transaction.amount > 1000:
-            features[15] += 1.0
+            features[15] += 0.5  # V16 feature
         
-        return np.append(features, transaction.amount)
+        # Set Amount (29th feature)
+        features[28] = transaction.amount
+        
+        # Set Time (30th feature) - convert hour to seconds since midnight
+        features[29] = transaction.hour * 3600  # Time in seconds
+        
+        return features
     
     def _rule_based_prediction(self, transaction: TransactionRequest) -> float:
         """Fallback rule-based prediction"""
@@ -192,7 +250,10 @@ async def predict_fraud(transaction: TransactionRequest):
             "uganda_amount": transaction.amount * 3700
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Prediction error: {e}")  # Debug logging
+        import traceback
+        traceback.print_exc()  # Full error trace
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 @app.get("/api/models/performance")
 async def get_model_performance():
