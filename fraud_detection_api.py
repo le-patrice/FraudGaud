@@ -233,9 +233,9 @@ model_manager = ModelManager()
 async def serve_dashboard():
     """Serve main dashboard"""
     try:
-        return FileResponse("fraud_detection_dashboard_enhanced.html")
+        return FileResponse("dashboard.html")
     except FileNotFoundError:
-        return {"message": "Dashboard not found. Place fraud_detection_dashboard_enhanced.html in root directory."}
+        return {"message": "Dashboard not found. Place dashboard.html in root directory."}
 
 @app.post("/api/predict")
 async def predict_fraud(transaction: TransactionRequest):

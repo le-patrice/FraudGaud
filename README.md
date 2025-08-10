@@ -68,7 +68,7 @@ Test transactions in real-time with your trained models:
 fraud_detection_project/
 ├── fraud_detection_analysis.py         # ML training pipeline (100 lines)
 ├── fraud_detection_api.py             # FastAPI backend (140 lines)  
-├── fraud_detection_dashboard_enhanced.html  # Advanced web dashboard
+├── dashboard.html  # Advanced web dashboard
 ├── requirements.txt                    # Minimal dependencies (11 packages)
 ├── README.md                          # This documentation
 ├── screenshots/                       # Dashboard screenshots
