@@ -1,11 +1,13 @@
 """
 🛡️ FraudGuard FastAPI Backend
 ===========================
-Production-ready fraud detection API
+Production-ready fraud detection API with frontend support
 """
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import joblib
 import numpy as np
@@ -27,15 +29,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Add after the CORS middleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-
-app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
-
-@app.get("/")
-async def serve_dashboard():
-    return FileResponse("fraud_detection_dashboard_enhanced.html")
+# Serve static files (CSS, JS, images, fonts)
+if os.path.exists("static"):
+    app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
 
 class TransactionRequest(BaseModel):
     amount: float
@@ -175,6 +171,14 @@ class ModelManager:
 # Initialize model manager
 model_manager = ModelManager()
 
+@app.get("/")
+async def serve_dashboard():
+    """Serve main dashboard"""
+    try:
+        return FileResponse("fraud_detection_dashboard_enhanced.html")
+    except FileNotFoundError:
+        return {"message": "Dashboard not found. Place fraud_detection_dashboard_enhanced.html in root directory."}
+
 @app.post("/api/predict")
 async def predict_fraud(transaction: TransactionRequest):
     """Predict fraud for transaction"""
@@ -199,10 +203,10 @@ async def get_model_performance():
             "best_model": model_manager._get_best_model_name()
         }
     
-    # Demo metrics
+    # Demo metrics if no trained models available
     return {
         "models": [
-            {"model": "Random Forest", "accuracy": 0.9996, "precision": 0.9567, "recall": 0.8095, "f1_score": 0.8776, "roc_auc": 0.9875},
+            {"model": "Random Forest", "accuracy": 0.9994, "precision": 0.9567, "recall": 0.8095, "f1_score": 0.8776, "roc_auc": 0.9875},
             {"model": "XGBoost", "accuracy": 0.9971, "precision": 0.3613, "recall": 0.8776, "f1_score": 0.5119, "roc_auc": 0.9765},
             {"model": "Logistic Regression", "accuracy": 0.9591, "precision": 0.8813, "recall": 0.6190, "f1_score": 0.7284, "roc_auc": 0.9456}
         ],

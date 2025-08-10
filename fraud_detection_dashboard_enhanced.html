@@ -132,6 +132,23 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .model-performance-table {
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .best-model-row {
+      background: linear-gradient(90deg, rgba(40, 167, 69, 0.1), transparent);
+      border-left: 4px solid #28a745;
+    }
+
+    .metric-loading {
+      color: #6c757d;
+      font-style: italic;
+    }
   </style>
 </head>
 <!-- [Head] end -->
@@ -183,7 +200,7 @@
             <a href="#model-performance" class="pc-link" onclick="scrollToSection('model-performance')">
               <span class="pc-micon"><i class="ph-duotone ph-target"></i></span>
               <span class="pc-mtext">Model Performance</span>
-              <span class="badge bg-light-success ms-auto">99.96%</span>
+              <span class="badge bg-light-success ms-auto" id="sidebar-accuracy">Loading...</span>
             </a>
           </li>
           
@@ -291,7 +308,7 @@
             <div class="col-md-12">
               <div class="page-header-title">
                 <h2 class="mb-0">🛡️ Advanced Fraud Detection Analytics</h2>
-                <p class="text-muted mt-1">Real-time ML-powered fraud detection with 99.96% accuracy</p>
+                <p class="text-muted mt-1">Real-time ML-powered fraud detection with <span id="header-accuracy" class="metric-loading">loading...</span> accuracy</p>
               </div>
             </div>
           </div>
@@ -310,7 +327,7 @@
                   <div class="p-4">
                     <h1 class="text-white mb-3">🛡️ FraudGuard Analytics</h1>
                     <h4 class="text-white mb-3">Advanced ML-Powered Fraud Detection System</h4>
-                    <p class="text-white mb-4">Real-time fraud detection with 99.96% accuracy protecting millions in transactions daily.</p>
+                    <p class="text-white mb-4">Real-time fraud detection with <span id="banner-accuracy" class="metric-loading">loading...</span> accuracy protecting millions in transactions daily.</p>
                     <div class="d-flex gap-2 mb-3">
                       <a href="#model-performance" class="btn btn-outline-light" onclick="scrollToSection('model-performance')">
                         <i class="ph-duotone ph-chart-line me-1"></i>View Performance
@@ -338,9 +355,9 @@
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <h6 class="mb-2 text-white-50">Model Accuracy</h6>
-                  <h2 class="mb-0 text-white">99.96%</h2>
+                  <h2 class="mb-0 text-white" id="kpi-accuracy">Loading...</h2>
                   <span class="badge bg-light text-primary mt-2">
-                    <i class="ph-duotone ph-trend-up me-1"></i> Random Forest
+                    <i class="ph-duotone ph-trend-up me-1"></i> <span id="best-model-name">Loading...</span>
                   </span>
                 </div>
                 <div class="text-white" style="font-size: 2.5rem; opacity: 0.7;">
@@ -358,7 +375,7 @@
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <h6 class="mb-2 text-white-50">Detection Rate</h6>
-                  <h2 class="mb-0 text-white">81.63%</h2>
+                  <h2 class="mb-0 text-white" id="kpi-recall">Loading...</h2>
                   <span class="badge bg-light text-success mt-2">
                     <i class="ph-duotone ph-shield-check me-1"></i> Active
                   </span>
@@ -377,10 +394,10 @@
             <div class="card-body text-white">
               <div class="d-flex align-items-center justify-content-between">
                 <div>
-                  <h6 class="mb-2 text-white-50">False Positive Rate</h6>
-                  <h2 class="mb-0 text-white">0.009%</h2>
+                  <h6 class="mb-2 text-white-50">Precision</h6>
+                  <h2 class="mb-0 text-white" id="kpi-precision">Loading...</h2>
                   <span class="badge bg-light text-warning mt-2">
-                    <i class="ph-duotone ph-trend-down me-1"></i> Excellent
+                    <i class="ph-duotone ph-trend-up me-1"></i> Excellent
                   </span>
                 </div>
                 <div class="text-white" style="font-size: 2.5rem; opacity: 0.7;">
@@ -397,14 +414,14 @@
             <div class="card-body text-white">
               <div class="d-flex align-items-center justify-content-between">
                 <div>
-                  <h6 class="mb-2 text-white-50">Daily Savings</h6>
-                  <h2 class="mb-0 text-white">$9,651</h2>
+                  <h6 class="mb-2 text-white-50">F1-Score</h6>
+                  <h2 class="mb-0 text-white" id="kpi-f1">Loading...</h2>
                   <span class="badge bg-light text-info mt-2">
-                    <i class="ph-duotone ph-currency-dollar me-1"></i> Today
+                    <i class="ph-duotone ph-trophy me-1"></i> Best
                   </span>
                 </div>
                 <div class="text-white" style="font-size: 2.5rem; opacity: 0.7;">
-                  <i class="ph-duotone ph-piggy-bank"></i>
+                  <i class="ph-duotone ph-medal"></i>
                 </div>
               </div>
             </div>
@@ -418,33 +435,38 @@
             <div class="card-header d-flex align-items-center justify-content-between">
               <div>
                 <h5 class="mb-1">🎯 Model Performance Comparison</h5>
-                <p class="text-muted mb-0">Random Forest leads with 99.96% accuracy</p>
+                <p class="text-muted mb-0"><span id="performance-best-model">Loading...</span> leads with best F1-Score</p>
               </div>
               <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm" onclick="refreshCharts()">
+                <button class="btn btn-outline-primary btn-sm" onclick="loadModelPerformance()">
                   <i class="ph-duotone ph-arrows-clockwise me-1"></i>Refresh
                 </button>
               </div>
             </div>
             <div class="card-body">
-              <ul class="nav nav-pills justify-content-end mb-3" role="tablist">
-                <li class="nav-item">
-                  <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#model-accuracy" type="button">
-                    <i class="ph-duotone ph-chart-bar me-1"></i>Accuracy
-                  </button>
-                </li>
-                <li class="nav-item">
-                  <button class="nav-link" data-bs-toggle="pill" data-bs-target="#model-metrics" type="button">
-                    <i class="ph-duotone ph-chart-line me-1"></i>All Metrics
-                  </button>
-                </li>
-              </ul>
-              <div class="tab-content">
-                <div class="tab-pane show active" id="model-accuracy">
-                  <div id="model-performance-chart" style="height: 350px;"></div>
+              <div id="model-loading" class="chart-loading">
+                <div>
+                  <div class="loading-spinner"></div>
+                  <p class="mt-3 text-muted">Loading model performance data...</p>
                 </div>
-                <div class="tab-pane" id="model-metrics">
-                  <div id="model-metrics-chart" style="height: 350px;"></div>
+              </div>
+              <div id="model-table-container" style="display: none;">
+                <div class="model-performance-table">
+                  <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                      <tr>
+                        <th>Model</th>
+                        <th>Accuracy</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1-Score</th>
+                        <th>ROC-AUC</th>
+                      </tr>
+                    </thead>
+                    <tbody id="model-performance-tbody">
+                      <!-- Dynamic content -->
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -568,11 +590,11 @@
             <div class="list-group list-group-flush">
               <div class="list-group-item d-flex justify-content-between">
                 <span>Fraud Prevention Rate</span>
-                <span class="h6 mb-0 text-success">81.6%</span>
+                <span class="h6 mb-0 text-success" id="business-recall">Loading...</span>
               </div>
               <div class="list-group-item d-flex justify-content-between">
-                <span>False Positive Rate</span>
-                <span class="h6 mb-0 text-success">0.009%</span>
+                <span>Precision Rate</span>
+                <span class="h6 mb-0 text-success" id="business-precision">Loading...</span>
               </div>
               <div class="list-group-item d-flex justify-content-between">
                 <span>Daily Savings</span>
@@ -657,7 +679,7 @@
           <div class="card">
             <div class="card-header">
               <h5 class="mb-1">🎮 Live Fraud Detection Demo</h5>
-              <p class="text-muted mb-0">Test fraud detection in real-time</p>
+              <p class="text-muted mb-0">Test fraud detection with trained models in real-time</p>
             </div>
             <div class="card-body">
               <form id="fraud-demo-form">
@@ -670,11 +692,11 @@
                     <div class="mb-3">
                       <label class="form-label">Merchant</label>
                       <select class="form-select" id="demo-merchant">
-                        <option value="Amazon.com">Amazon.com</option>
+                        <option value="Amazon">Amazon.com</option>
                         <option value="Starbucks">Starbucks</option>
                         <option value="MTN Mobile Money">MTN Mobile Money</option>
-                        <option value="Unknown Merchant">Unknown Merchant</option>
-                        <option value="Crypto Exchange">Crypto Exchange</option>
+                        <option value="Unknown">Unknown Merchant</option>
+                        <option value="Crypto">Crypto Exchange</option>
                       </select>
                     </div>
                   </div>
@@ -698,7 +720,15 @@
                     </div>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="demo-card-present" checked>
+                    <label class="form-check-label" for="demo-card-present">
+                      Card Present Transaction
+                    </label>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="demo-submit-btn">
                   <i class="ph-duotone ph-detective me-2"></i>Analyze Transaction
                 </button>
               </form>
@@ -719,50 +749,138 @@
   <!-- [ Main Content ] end -->
 
   <!-- Required Scripts -->
-  <script src="./static/assets/js/plugins/popper.min.js"></script>
-  <script src="./static/assets/js/plugins/simplebar.min.js"></script>
-  <script src="./static/assets/js/plugins/bootstrap.min.js"></script>
-  <script src="./static/assets/js/pcoded.js"></script>
-  <script src="./static/assets/js/theme.js"></script>
-  <script src="./static/assets/js/plugins/feather.min.js"></script>
-  <script src="./static/assets/js/plugins/apexcharts.min.js"></script>
-  
-  <!-- FraudGuard Core JavaScript -->
-  <script src="./static/assets/js/fraud_dashboard_core.js"></script>
+  <script src="./assets/js/plugins/popper.min.js"></script>
+  <script src="./assets/js/plugins/simplebar.min.js"></script>
+  <script src="./assets/js/plugins/bootstrap.min.js"></script>
+  <script src="./assets/js/pcoded.js"></script>
+  <script src="./assets/js/theme.js"></script>
+  <script src="./assets/js/plugins/feather.min.js"></script>
+  <script src="./assets/js/plugins/apexcharts.min.js"></script>
 
   <script>
+    // Global variables
+    let modelData = [];
+    let bestModelData = null;
+
     // Initialize everything when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🛡️ Initializing FraudGuard Dashboard...');
       
       // Initialize Feather icons
-      feather.replace();
-      
-      // Initialize charts and functionality
-      if (typeof initializeDashboard === 'function') {
-        initializeDashboard();
-      } else {
-        console.warn('FraudGuard core not loaded, using fallback');
-        // Fallback initialization
-        initializeFallback();
+      if (typeof feather !== 'undefined') {
+        feather.replace();
       }
+      
+      // Load model performance data
+      loadModelPerformance();
       
       // Setup demo form
       setupDemoForm();
       
       console.log('✅ FraudGuard Dashboard Ready!');
     });
-    
-    function initializeFallback() {
-      // Basic initialization when core JS isn't available
-      console.log('Using fallback initialization');
+
+    // Load model performance data from API
+    async function loadModelPerformance() {
+      try {
+        console.log('Loading model performance...');
+        const response = await fetch('/api/models/performance');
+        const data = await response.json();
+        
+        modelData = data.models;
+        const bestModelName = data.best_model;
+        
+        // Find best model data
+        bestModelData = modelData.find(model => model.model === bestModelName) || modelData[0];
+        
+        // Update all UI elements
+        updateKPICards(bestModelData);
+        updateModelTable(modelData, bestModelName);
+        updateTextElements(bestModelData, bestModelName);
+        
+        console.log('✅ Model performance loaded successfully');
+        
+      } catch (error) {
+        console.error('Error loading model data:', error);
+        showFallbackData();
+      }
     }
-    
+
+    // Update KPI cards with real data
+    function updateKPICards(bestModel) {
+      if (!bestModel) return;
+      
+      document.getElementById('kpi-accuracy').textContent = `${(bestModel.accuracy * 100).toFixed(2)}%`;
+      document.getElementById('kpi-recall').textContent = `${(bestModel.recall * 100).toFixed(2)}%`;
+      document.getElementById('kpi-precision').textContent = `${(bestModel.precision * 100).toFixed(2)}%`;
+      document.getElementById('kpi-f1').textContent = `${(bestModel.f1_score * 100).toFixed(2)}%`;
+    }
+
+    // Update model performance table
+    function updateModelTable(models, bestModelName) {
+      const tableBody = document.getElementById('model-performance-tbody');
+      const loadingDiv = document.getElementById('model-loading');
+      const tableContainer = document.getElementById('model-table-container');
+      
+      tableBody.innerHTML = '';
+      
+      models.forEach(model => {
+        const row = document.createElement('tr');
+        const isBest = model.model === bestModelName;
+        
+        if (isBest) {
+          row.classList.add('best-model-row');
+        }
+        
+        row.innerHTML = `
+          <td>
+            <strong>${model.model}</strong>
+            ${isBest ? '<span class="badge bg-success ms-2">Best</span>' : ''}
+          </td>
+          <td>${(model.accuracy * 100).toFixed(2)}%</td>
+          <td>${(model.precision * 100).toFixed(2)}%</td>
+          <td>${(model.recall * 100).toFixed(2)}%</td>
+          <td><strong>${(model.f1_score * 100).toFixed(2)}%</strong></td>
+          <td>${(model.roc_auc * 100).toFixed(2)}%</td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+      
+      // Show table, hide loading
+      loadingDiv.style.display = 'none';
+      tableContainer.style.display = 'block';
+    }
+
+    // Update text elements throughout the page
+    function updateTextElements(bestModel, bestModelName) {
+      if (!bestModel) return;
+      
+      const accuracyText = `${(bestModel.accuracy * 100).toFixed(2)}%`;
+      
+      // Update header elements
+      document.getElementById('header-accuracy').textContent = accuracyText;
+      document.getElementById('banner-accuracy').textContent = accuracyText;
+      
+      // Update sidebar
+      document.getElementById('sidebar-accuracy').textContent = accuracyText;
+      
+      // Update best model name
+      document.getElementById('best-model-name').textContent = bestModelName;
+      document.getElementById('performance-best-model').textContent = bestModelName;
+      
+      // Update business metrics
+      document.getElementById('business-recall').textContent = `${(bestModel.recall * 100).toFixed(1)}%`;
+      document.getElementById('business-precision').textContent = `${(bestModel.precision * 100).toFixed(1)}%`;
+    }
+
+    // Setup demo form functionality
     function setupDemoForm() {
       const form = document.getElementById('fraud-demo-form');
       const hourSlider = document.getElementById('demo-hour');
       const hourDisplay = document.getElementById('hour-display');
       
+      // Hour slider display
       if (hourSlider && hourDisplay) {
         hourSlider.addEventListener('input', function() {
           const hour = parseInt(this.value);
@@ -773,99 +891,159 @@
         });
       }
       
+      // Form submission
       if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
           e.preventDefault();
-          runFraudDemo();
+          await runFraudDemo();
         });
       }
     }
-    
+
+    // Run fraud detection demo
     async function runFraudDemo() {
-      const amount = parseFloat(document.getElementById('demo-amount')?.value || 125.50);
-      const merchant = document.getElementById('demo-merchant')?.value || 'Amazon.com';
-      const location = document.getElementById('demo-location')?.value || 'Kampala';
-      const hour = parseInt(document.getElementById('demo-hour')?.value || 14);
-      
+      const submitBtn = document.getElementById('demo-submit-btn');
       const resultDiv = document.getElementById('demo-result');
       const alertDiv = document.getElementById('demo-alert');
       const contentDiv = document.getElementById('demo-result-content');
       
-      if (!resultDiv || !alertDiv || !contentDiv) return;
+      // Get form data
+      const transactionData = {
+        amount: parseFloat(document.getElementById('demo-amount').value),
+        hour: parseInt(document.getElementById('demo-hour').value),
+        merchant: document.getElementById('demo-merchant').value,
+        location: document.getElementById('demo-location').value,
+        card_present: document.getElementById('demo-card-present').checked
+      };
       
       try {
+        // Show loading state
+        submitBtn.innerHTML = '<i class="ph-duotone ph-spinner-gap fa-spin me-2"></i>Analyzing...';
+        submitBtn.disabled = true;
+        
         resultDiv.style.display = 'block';
         alertDiv.className = 'alert alert-info';
-        contentDiv.innerHTML = '<i class="ph-duotone ph-spinner-gap fa-spin me-2"></i>Analyzing transaction...';
+        contentDiv.innerHTML = '<i class="ph-duotone ph-spinner-gap fa-spin me-2"></i>Processing with trained models...';
         
-        // Simulate prediction
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Call actual API
+        const response = await fetch('/api/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(transactionData)
+        });
         
-        // Simple rule-based prediction for demo
-        let riskScore = 0;
-        if (amount > 1000) riskScore += 0.3;
-        if (hour < 6 || hour > 22) riskScore += 0.2;
-        if (['Unknown Merchant', 'Crypto Exchange'].includes(merchant)) riskScore += 0.4;
-        if (['Unknown', 'Foreign'].includes(location)) riskScore += 0.3;
-        
-        const fraudProb = Math.min(riskScore, 0.95);
-        const riskLevel = fraudProb > 0.7 ? 'HIGH' : fraudProb > 0.4 ? 'MEDIUM' : 'LOW';
-        const ugxAmount = amount * 3700;
-        
-        let alertClass, icon, statusText;
-        
-        if (riskLevel === 'HIGH') {
-          alertClass = 'alert-danger';
-          icon = 'ph-x-circle';
-          statusText = 'BLOCK TRANSACTION';
-        } else if (riskLevel === 'MEDIUM') {
-          alertClass = 'alert-warning';
-          icon = 'ph-warning-circle';
-          statusText = 'MANUAL REVIEW REQUIRED';
-        } else {
-          alertClass = 'alert-success';
-          icon = 'ph-check-circle';
-          statusText = 'APPROVE TRANSACTION';
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        alertDiv.className = `alert ${alertClass}`;
-        contentDiv.innerHTML = `
-          <div class="d-flex align-items-center mb-3">
-            <i class="ph-duotone ${icon} me-2" style="font-size: 1.5rem;"></i>
-            <h5 class="mb-0">${statusText}</h5>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <p><strong>Fraud Probability:</strong> ${(fraudProb * 100).toFixed(1)}%</p>
-              <p><strong>Risk Level:</strong> ${riskLevel}</p>
-              <p><strong>Amount:</strong> $${amount.toFixed(2)} (UGX ${ugxAmount.toLocaleString()})</p>
-            </div>
-            <div class="col-md-6">
-              <p><strong>Processing Time:</strong> 45.2 ms</p>
-              <p><strong>Model Used:</strong> Random Forest</p>
-              <p><strong>Location:</strong> ${location}</p>
-            </div>
-          </div>
-        `;
+        const result = await response.json();
+        
+        // Display result
+        displayPredictionResult(result);
         
       } catch (error) {
         console.error('Demo error:', error);
         alertDiv.className = 'alert alert-danger';
-        contentDiv.innerHTML = '<strong>Error:</strong> Demo unavailable. Please try again.';
+        contentDiv.innerHTML = `
+          <div class="d-flex align-items-center">
+            <i class="ph-duotone ph-warning-triangle me-2"></i>
+            <strong>Error:</strong> Unable to connect to API. Please ensure the backend is running.
+          </div>
+        `;
+      } finally {
+        // Reset button
+        submitBtn.innerHTML = '<i class="ph-duotone ph-detective me-2"></i>Analyze Transaction';
+        submitBtn.disabled = false;
       }
     }
-    
+
+    // Display prediction result
+    function displayPredictionResult(result) {
+      const alertDiv = document.getElementById('demo-alert');
+      const contentDiv = document.getElementById('demo-result-content');
+      
+      const { fraud_probability, risk_level, recommendation, processing_time_ms, model_used, risk_factors, uganda_amount } = result;
+      
+      let alertClass, icon, statusText;
+      
+      if (risk_level === 'HIGH') {
+        alertClass = 'alert-danger';
+        icon = 'ph-x-circle';
+        statusText = 'TRANSACTION BLOCKED';
+      } else if (risk_level === 'MEDIUM') {
+        alertClass = 'alert-warning';
+        icon = 'ph-warning-circle';
+        statusText = 'MANUAL REVIEW REQUIRED';
+      } else {
+        alertClass = 'alert-success';
+        icon = 'ph-check-circle';
+        statusText = 'TRANSACTION APPROVED';
+      }
+      
+      alertDiv.className = `alert ${alertClass}`;
+      contentDiv.innerHTML = `
+        <div class="d-flex align-items-center mb-3">
+          <i class="ph-duotone ${icon} me-2" style="font-size: 1.5rem;"></i>
+          <h5 class="mb-0">${statusText}</h5>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Fraud Probability:</strong> ${(fraud_probability * 100).toFixed(1)}%</p>
+            <p><strong>Risk Level:</strong> ${risk_level}</p>
+            <p><strong>Recommendation:</strong> ${recommendation}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Processing Time:</strong> ${processing_time_ms}ms</p>
+            <p><strong>Model Used:</strong> ${model_used}</p>
+            <p><strong>Uganda Amount:</strong> UGX ${uganda_amount.toLocaleString()}</p>
+          </div>
+        </div>
+        ${risk_factors.length > 0 ? `
+          <div class="mt-3">
+            <p><strong>Risk Factors Detected:</strong></p>
+            <ul class="mb-0">
+              ${risk_factors.map(factor => `<li>${factor}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    // Fallback data if API is not available
+    function showFallbackData() {
+      console.log('Using fallback data...');
+      
+      const fallbackModels = [
+        {"model": "Random Forest", "accuracy": 0.9994, "precision": 0.9567, "recall": 0.8095, "f1_score": 0.8776, "roc_auc": 0.9875},
+        {"model": "XGBoost", "accuracy": 0.9971, "precision": 0.3613, "recall": 0.8776, "f1_score": 0.5119, "roc_auc": 0.9765},
+        {"model": "Logistic Regression", "accuracy": 0.9591, "precision": 0.8813, "recall": 0.6190, "f1_score": 0.7284, "roc_auc": 0.9456}
+      ];
+      
+      bestModelData = fallbackModels[0];
+      updateKPICards(bestModelData);
+      updateModelTable(fallbackModels, "Random Forest");
+      updateTextElements(bestModelData, "Random Forest");
+    }
+
+    // Utility functions
     function scrollToSection(sectionId) {
       const element = document.getElementById(sectionId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-    
-    function refreshCharts() {
-      console.log('Refreshing charts...');
-      // Chart refresh logic would go here
+
+    // Update last update time
+    function updateLastUpdateTime() {
+      const now = new Date();
+      document.getElementById('last-update').textContent = now.toLocaleTimeString();
     }
+
+    // Update time every 30 seconds
+    setInterval(updateLastUpdateTime, 30000);
+    updateLastUpdateTime();
   </script>
 
 </body>
